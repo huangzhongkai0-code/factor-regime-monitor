@@ -18,6 +18,26 @@
 
 快速查看：[最新文字简报](latest_regime_summary.txt) · [宏观相关性摘要](macro_correlation_summary.txt) · [宏观对照图](regime_vs_macro.png)
 
+## 状态标签的前瞻验证
+
+为了检验状态标签是否具有预测意义，项目增加了严格的时点检验：每个交易日只使用当时可获得的63日滚动收益和过去252日分布确定状态，再统计随后1、3和6个月收益。下表为六只ETF的平均结果：
+
+| 后续期限 | 收缩状态 | 中性状态 | 扩张状态 |
+|---|---:|---:|---:|
+| 1个月 | 2.07% | 1.00% | 0.52% |
+| 3个月 | 4.86% | 3.17% | 2.04% |
+| 6个月 | 8.11% | 6.00% | 6.70% |
+
+![前瞻收益验证](validation_outputs/forward_return_validation.png)
+
+结果不支持“扩张状态必然带来更高后续收益”的简单预测解释。相反，收缩状态后的平均收益更高，可能反映均值回归、ETF差异和重叠样本影响。因此，本框架更适合描述当前市场结构和风险偏好，而不应单独用作择时信号。
+
+每周状态转移矩阵显示状态具有一定持续性：收缩、 中性和扩张状态下一周保持原状态的概率分别约为75.8%、86.2%和69.4%。
+
+![状态转移矩阵](validation_outputs/state_transition_matrix.png)
+
+复现脚本：[validate_regime_signal.py](validate_regime_signal.py)。详细分组结果保存在 `validation_outputs/forward_return_by_state.csv`，状态转移概率保存在 `validation_outputs/weekly_state_transition_matrix.csv`。
+
 ## 项目背景
 
 投研工作中常需要判断"当前市场处于什么风格阶段"（比如价值股占优还是成长股占优、防御性资产是否走强等）。本项目尝试用可复现的量化方法，把这种判断从"凭感觉"变成"有数据支撑的结构化结论"。
@@ -39,6 +59,7 @@
 | `calculate_regime_zscore.py` | 计算 Z-score 并分类市场状态 |
 | `generate_regime_report.py` | 生成状态热力图与文字简报 |
 | `compare_regime_with_macro.py` | 叠加宏观数据做交叉验证（需配置 FRED API key） |
+| `validate_regime_signal.py` | 检验不同状态后的1/3/6个月收益与状态转移概率 |
 
 ## 示例输出
 
@@ -66,6 +87,7 @@ python compare_regime_with_macro.py
 - Z-score 阈值（±1）可通过命令行参数调整
 - 宏观相关性分析样本有限（12 个月滚动窗口），仅作描述性观察，不构成预测信号或投资建议
 - “最新市场状态”和“最新完整宏观相关窗口”采用各自可获得的数据截止日，不能混为同一时点结论
+- 前瞻收益使用重叠持有期观测，结果用于描述性稳健性检查，不代表独立交易次数或可执行策略收益
 
 ## 后续计划
 
